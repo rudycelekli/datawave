@@ -131,6 +131,8 @@ public class MACAddress implements Serializable, Comparable<MACAddress> {
             if (groupingSize < 1 || groupingSize > MAC_ADDRESS_LENGTH) {
                 throw new IllegalArgumentException("Grouping size must be between 1 and " + MAC_ADDRESS_LENGTH + ", inclusive.");
             }
+            // keep the separator as given for the comparisons below; the regex-escaped form is only for split and replaceAll
+            final String originalSep = sep;
             if (sep.matches("\\.")) {
                 sep = "\\" + sep;
             }
@@ -153,7 +155,7 @@ public class MACAddress implements Serializable, Comparable<MACAddress> {
             }
             // If this doesn't look like a standard MAC address, make sure it has hex digits to avoid picking up
             // IPs, etc.
-            if (strict && ((groupingSize != 2 && groupingSize != 4) || (!sep.equals(".") && !sep.equals(":") && !sep.equals("-")))) {
+            if (strict && ((groupingSize != 2 && groupingSize != 4) || (!originalSep.equals(".") && !originalSep.equals(":") && !originalSep.equals("-")))) {
                 String addrNoSep = new String(addr);
                 if (!sep.equals("")) {
                     addrNoSep = addrNoSep.replaceAll(sep, "");
