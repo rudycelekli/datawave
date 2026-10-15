@@ -1,6 +1,7 @@
 package datawave.data.normalizer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -139,6 +140,19 @@ public class DateNormalizerTest {
         String normalizedFromLong = normalizer.normalize("" + rightNow);
         String normalizedFromDate = normalizer.normalizeDelegateType(now);
         assertEquals(normalizedFromLong, normalizedFromDate);
+    }
+
+    @Test
+    public void testEmptyStringIsNotADate() {
+        assertThrows(IllegalArgumentException.class, () -> normalizer.normalize(""));
+    }
+
+    @Test
+    public void testDigitStringThatOverflowsALongIsNotADate() {
+        // 2^64 + 1 would wrap around to 1 millisecond after the epoch if the digits were accumulated without an overflow check
+        assertThrows(IllegalArgumentException.class, () -> normalizer.normalize("18446744073709551617"));
+        assertThrows(IllegalArgumentException.class, () -> normalizer.normalize("18446744073709551616"));
+        assertThrows(IllegalArgumentException.class, () -> normalizer.normalize("99999999999999999999"));
     }
 
     /**

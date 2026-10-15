@@ -113,24 +113,23 @@ public class DateNormalizer extends AbstractNormalizer<Date> {
 
         // see if fieldValue looks like a Long value
         try {
-            boolean valid = true;
             int size = fieldValue.length();
+            // an empty string is not a number, and must not be read as the epoch
+            boolean valid = size > 0;
             long dateLong = 0;
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size && valid; i++) {
                 char c = fieldValue.charAt(i);
                 if (c >= '0' && c <= '9') {
-                    dateLong *= 10;
-                    dateLong += (c - '0');
+                    dateLong = Math.addExact(Math.multiplyExact(dateLong, 10L), c - '0');
                 } else {
                     valid = false;
-                    break;
                 }
             }
             if (valid && sanityCheck(dateLong)) {
                 return new Date(dateLong);
             }
-        } catch (NumberFormatException e) {
-            // well, it's not a long
+        } catch (ArithmeticException e) {
+            // well, it's not a long (the digits overflow)
         }
 
         throw new IllegalArgumentException("Failed to normalize value as a Date: " + fieldValue);
